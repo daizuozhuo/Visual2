@@ -75,7 +75,12 @@ public class Processor {;
 	private void processContent(String content){
 		String[] strs= content.split(" "); 
 		String word= strs[0];
-		int cnt = Integer.parseInt(strs[1]); 
+		int cnt=0;
+		try{
+			cnt = Integer.parseInt(strs[1]); 
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 		
 		//search the word
 
