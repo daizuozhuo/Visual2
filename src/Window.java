@@ -29,7 +29,6 @@ public class Window extends JFrame {
 	private JMenu menuPreference;
 	private JMenu menuColorStyle;
 	private JMenuItem menuItem_start_single;
-	private JMenuItem menuItem_start_multi;
 	private JMenuItem menuItem_back;
 	private JMenuItem menuItem_save;
 	private JMenuItem menuItem_exit;
@@ -73,8 +72,7 @@ public class Window extends JFrame {
 
 		//a group of JMenuItems
 		
-		menuItem_start_single = new JMenuItem("Start single-file mode",KeyEvent.VK_S);
-		menuItem_start_multi = new JMenuItem("Start muiti-file mode",KeyEvent.VK_M);
+		menuItem_start_single = new JMenuItem("Start",KeyEvent.VK_S);
 		menuItem_back = new JMenuItem("Set background image",KeyEvent.VK_B);
 		menuItem_save = new JMenuItem("Save Image",KeyEvent.VK_I);
 		menuItem_exit = new JMenuItem("Exit",KeyEvent.VK_E);
@@ -92,17 +90,10 @@ public class Window extends JFrame {
 		menuItem_start_single.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
             {
-                start_single();
+                start();
             }
         });   
-		
-		menuItem_start_multi.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e)
-            {
-                start_multi();
-            }
-        }); 
-		
+
 		menuItem_back.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
             {
@@ -127,7 +118,6 @@ public class Window extends JFrame {
 		
 		
 		menuFile.add(menuItem_start_single);
-		menuFile.add(menuItem_start_multi);
 		menuFile.add(menuItem_back);
 		menuFile.add(menuItem_save);
 		menuFile.add(menuItem_exit);
@@ -137,21 +127,8 @@ public class Window extends JFrame {
 		this.setJMenuBar(menuBar);
 	}
 	
-	private void start_single()
-	{
-        Catcher catcher = new Catcher();
-        // Load library
-        try
-        {
-			catcher.load_library();
-			System.out.println("Library Load Successful!"); 
-		} 
-        catch (IOException e) 
-        {
-    		System.out.println("Library Load Error!");
-			e.printStackTrace();
-        }
-        
+	private void start()
+	{        
         // Analyse input
         try
         {
@@ -183,57 +160,13 @@ public class Window extends JFrame {
        	for (int i = 0 ; i < result.size(); i++) result.get(i).print();
        	System.out.println("------------------ " + result.size() + " keywords found ------------------");
 
-       	painter = new Painter_single(result, width, height, menuItem_update.getState(), wordle);
+       	painter = new Painter(result, width, height, menuItem_update.getState(), wordle);
 	
    		JOptionPane.showMessageDialog(null, painter.paint(), "Message", 1/*, new ImageIcon(Toolkit.getDefaultToolkit().getImage("res/icon.jpg"))*/);
    		wordle.setImg(painter.getImg());
    		wordle.repaint();
 	}
-	
-	private void start_multi()
-	{
-        Catcher catcher = new Catcher();
-        // Load library
-        try
-        {
-			catcher.load_library();
-			System.out.println("Library Load Successful!"); 
-		} 
-        catch (IOException e) 
-        {
-    		System.out.println("Library Load Error!");
-			e.printStackTrace();
-        }
-        
-        // Analyse input
-        try
-        {
-			catcher.analyse("res/input1.txt", "res/input2.txt");
-    		System.out.println("Analysis Successful!");
-		} 
-        catch (IOException e)
-        {
-    		System.out.println("Analysis Error!");
-			e.printStackTrace();
-		}
-        
-        // Sort the words found
-        Collection<Word> c = catcher.get_values();  
-        result = new Vector<Word>(c);
-        //result =  (Word[]) c.toArray(new Word[c.size()]);
-        Collections.sort(result);
-        
-       	for (int i = 0 ; i < result.size(); i++) result.get(i).print();
-       	System.out.println("------------------ " + result.size() + " keywords found ------------------");
-		setMenubar();
-		pack();
-       	painter = new Painter_multi(result, width, height, menuItem_update.getState(), wordle);
-	
-   		JOptionPane.showMessageDialog(null, painter.paint(), "Message", 1/*, new ImageIcon(Toolkit.getDefaultToolkit().getImage("res/icon.jpg"))*/);
-   		wordle.setImg(painter.getImg());
-   		wordle.repaint();
-	}
-	
+		
 	public void choose_backimg()
 	{
 		JFileChooser chooser = new JFileChooser();
