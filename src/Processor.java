@@ -31,8 +31,8 @@ public class Processor {;
 		File docs[] = filepath.listFiles();
 		date=Integer.parseInt(docs[0].getName());
 		labels= new Hashtable<String,Label>();
-//		for(int i=0; i<docs.length;i++){
-		for(int i=0; i<1;i++){
+		for(int i=0; i<docs.length;i++){
+//		for(int i=0; i<1;i++){
 			for(File doc:docs[i].listFiles()){
 				processDoc(doc);
 			}
