@@ -31,10 +31,11 @@ public class Processor {;
 		File docs[] = filepath.listFiles();
 		date=Integer.parseInt(docs[0].getName());
 		labels= new Hashtable<String,Label>();
+		Label.setMaxCount(docs.length);
 		for(int i=0; i<docs.length;i++){
 //		for(int i=0; i<1;i++){
 			for(File doc:docs[i].listFiles()){
-				processDoc(doc);
+				processDoc(doc,i);
 			}
 			
 		}
@@ -53,7 +54,7 @@ public class Processor {;
 		
 	}
 	
-	private void processDoc(File doc){
+	private void processDoc(File doc,int day){
 		if(!doc.isFile()) return ;
 		String content;
 		try {
@@ -62,7 +63,7 @@ public class Processor {;
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			while((content=br.readLine())!= null) {
 		//		System.out.println(content);
-				processContent(content);
+				processContent(content,day);
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -72,7 +73,7 @@ public class Processor {;
 			e.printStackTrace();
 		}
 	}
-	private void processContent(String content){
+	private void processContent(String content,int day){
 		String[] strs= content.split(" "); 
 		String word= strs[0];
 		int cnt=0;
@@ -86,11 +87,11 @@ public class Processor {;
 
 		if(labels.containsKey(word)){
 			Label label = labels.get(word);
-			label.addTimeLine(cnt);
+			label.addTimeLine(cnt,day);
 			labels.put(word,label);
 		} else {
 			Label label = new Label(word);
-			label.addTimeLine(cnt);
+			label.addTimeLine(cnt,day);
 			labels.put(word,label);
 		}
 	}

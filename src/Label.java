@@ -3,8 +3,7 @@ import java.util.Comparator;
 
 public class Label{
 	private int count;
-	private int index;
-	private final int MAXCOUNT=612;
+	private static int MAXCOUNT=612;
 	private String word;
 	private int timeLine[];
 	static int labelCount;
@@ -12,9 +11,11 @@ public class Label{
 		this.word=word;
 		timeLine = new int[MAXCOUNT];
 		count=0;
-		index=0;
 	}
 
+	public static void setMaxCount(int cnt){
+		MAXCOUNT=cnt;
+	}
 	@SuppressWarnings("rawtypes")
 	public static Comparator compareCount(){
 		return new Comparator(){
@@ -28,10 +29,9 @@ public class Label{
 	public String getWord(){
 		return word;
 	}
-	public void addTimeLine(int j){
-		if(index < MAXCOUNT){
-			timeLine[index]+=j;
-			index++;
+	public void addTimeLine(int j,int day){
+		if(day < MAXCOUNT){
+			timeLine[day]+=j;
 			count+=j;
 		}
 	}
