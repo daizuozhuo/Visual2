@@ -5,8 +5,8 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -23,7 +23,7 @@ import javax.swing.JRadioButtonMenuItem;
 @SuppressWarnings("serial")
 public class Window extends JFrame {
 
-	private Vector<Word> result;
+	private Vector<Occurrence> result;
 	private JMenuBar menuBar;
 	private JMenu menuFile;
 	private JMenu menuPreference;
@@ -129,36 +129,17 @@ public class Window extends JFrame {
 	
 	private void start()
 	{        
-        // Analyse input
-        try
-        {
-        	
-        	String filename = "res/input.txt";
-//        	JFileChooser chooser=new JFileChooser();
-//        	 int returnVal = chooser.showOpenDialog(this);
-//        	    if(returnVal == JFileChooser.APPROVE_OPTION) {
-//        	            filename=chooser.getSelectedFile().getName();
-//        	    }else{
-//        	    	throw new IOException();
-//        	    }
-
-			catcher.analyse(filename);
-    		System.out.println("Analysis Successful!");
-		} 
-        catch (IOException e)
-        {
-    		System.out.println("Analysis Error!");
-			e.printStackTrace();
+        // Analyse input init all labels
+		Processor pro=new Processor("Sony");
+		List<Label> labels=pro.getLabels();
+		Iterator<Label> i = labels.iterator();
+		while(i.hasNext())
+		{
+			i.next().init();
 		}
         
-        // Sort the words found
-        Collection<Word> c = catcher.get_values();  
-        result = new Vector<Word>(c);
-        //result =  (Word[]) c.toArray(new Word[c.size()]);
-        Collections.sort(result);
-        
-       	for (int i = 0 ; i < result.size(); i++) result.get(i).print();
-       	System.out.println("------------------ " + result.size() + " keywords found ------------------");
+//       	for (int i = 0 ; i < result.size(); i++) result.get(i).print();
+//       	System.out.println("------------------ " + result.size() + " keywords found ------------------");
 
        	painter = new Painter(result, width, height, menuItem_update.getState(), wordle);
 	

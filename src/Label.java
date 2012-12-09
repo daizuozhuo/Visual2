@@ -1,7 +1,9 @@
 
 
 public class Label {
-	private int count = 0;
+	private int count;
+	private int index;
+	private final int MAXCOUNT=612;
 	private String word;
 	private int timeLine[];
 	private int size[];
@@ -14,19 +16,34 @@ public class Label {
 	{
 		this.word=word;
 		//TODO:: this is wrong...
-		timeLine = new int[612];
+		timeLine = new int[MAXCOUNT];
+		count=0;
+		index=0;
 	}
+
+	
 	public String getWord()
 	{
 		return word;
 	}
 	
-	public int getCount()
-	{
+	public void addTimeLine(int j){
+		if(index < MAXCOUNT){
+			timeLine[index]+=j;
+			index++;
+			count+=j;
+		}
+	}
+	
+	public int getTimeLine(int i){
+		return timeLine[i];
+	}
+	
+	public int getCount(){
 		return count;
 	}
 	
-	private void init()
+	public void init()
 	{
 		int start = -1;
 		value = Math.log(count);
