@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 public class Processor {;
@@ -51,6 +50,7 @@ public class Processor {;
 		return listlabels;
 		
 	}
+	
 
 	
 	private void processDoc(File doc,int day){
@@ -94,27 +94,6 @@ public class Processor {;
 			labels.put(word,label);
 		}
 	}
-	private void processContent(String content){
-		String[] strs= content.split(" "); 
-		String word= strs[0];
-		int cnt=0;
-		try{
-			cnt = Integer.parseInt(strs[1]); 
-		} catch(Exception e){
-			e.printStackTrace();
-		}
-		
-		//search the word
 
-		if(labels.containsKey(word)){
-			Label label = labels.get(word);
-			label.addTimeLine(cnt);
-			labels.put(word,label);
-		} else {
-			Label label = new Label(word);
-			label.addTimeLine(cnt);
-			labels.put(word,label);
-		}
-	}
 
 }

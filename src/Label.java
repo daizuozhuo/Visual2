@@ -1,4 +1,3 @@
-import java.util.Comparator;
 
 
 public class Label {
@@ -6,7 +5,6 @@ public class Label {
 	private static final int SMOOTH = 5;	
 	private static final int threshold = 20;
 	private int count;
-	private int index;
 	private String word;
 	private int timeLine[];
 	private int size[];
@@ -23,36 +21,21 @@ public class Label {
 	public static void setMaxCount(int cnt){
 		MAXCOUNT=cnt;
 	}
-	@SuppressWarnings("rawtypes")
-	public static Comparator compareCount(){
-		return new Comparator(){
-			public int compare(Object o1, Object o2){
-				Label a=(Label)o1;
-				Label b=(Label)o2;
-				return a.getCount()-b.getCount();
-			}
-		};
+	
+	public String getWord(){
+		return word;
 	}
-
 	
 	public String getStr()
 	{
 		return word;
 	}
+	
 	public void addTimeLine(int j,int day){
 		if(day < MAXCOUNT){
 			timeLine[day]+=j;
 		}
 	}
-	
-	public void addTimeLine(int j){
-		if(index < MAXCOUNT){
-			timeLine[index]+=j;
-			index++;
-			count+=j;
-		}
-	}
-	
 	public int getTimeLine(int i){
 		return timeLine[i];
 	}
