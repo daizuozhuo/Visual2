@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.imageio.ImageIO;
 import javax.swing.JCheckBoxMenuItem;
@@ -23,7 +22,6 @@ import javax.swing.JRadioButtonMenuItem;
 @SuppressWarnings("serial")
 public class Window extends JFrame {
 
-	private Vector<Occurrence> result;
 	private JMenuBar menuBar;
 	private JMenu menuFile;
 	private JMenu menuPreference;
@@ -141,11 +139,13 @@ public class Window extends JFrame {
 //       	for (int i = 0 ; i < result.size(); i++) result.get(i).print();
 //       	System.out.println("------------------ " + result.size() + " keywords found ------------------");
 
-       	painter = new Painter(result, width, height, menuItem_update.getState(), wordle);
+       	painter = new Painter(width, height, wordle);
 	
    		JOptionPane.showMessageDialog(null, painter.paint(), "Message", 1/*, new ImageIcon(Toolkit.getDefaultToolkit().getImage("res/icon.jpg"))*/);
-   		wordle.setImg(painter.getImg());
-   		wordle.repaint();
+   	
+   		BufferedImage[] img = painter.getImg();
+   		myThread thread = new myThread(wordle, img);
+   		thread.start();
 	}
 		
 	public void choose_backimg()

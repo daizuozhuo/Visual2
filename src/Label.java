@@ -1,16 +1,15 @@
 
 
 public class Label {
+	public static final int MAXCOUNT=612;
+	private static final int SMOOTH = 5;	
+	private static final int threshold = 20;
 	private int count;
 	private int index;
-	private final int MAXCOUNT=612;
 	private String word;
 	private int timeLine[];
 	private int size[];
 	private double value; //how important the word is.
-	
-	private static final int SMOOTH = 5;
-	private static final int threshold = 20;
 	
 	public Label(String word)
 	{
@@ -22,7 +21,7 @@ public class Label {
 	}
 
 	
-	public String getWord()
+	public String getStr()
 	{
 		return word;
 	}

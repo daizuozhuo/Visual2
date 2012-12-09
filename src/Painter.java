@@ -3,9 +3,9 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.BufferedInputStream;
@@ -16,9 +16,10 @@ import java.util.Vector;
 
 public class Painter 
 {
-	private Vector<Word> words; // keywords to paint
+	private Vector<Occurrence> words; // keywords to paint
+	private Vector<Occurrence> current; // keywords to current exists
 	private final static String fontfile = "res/font.ttf"; // Font
-	private BufferedImage img;
+	private BufferedImage[] img;
 	Graphics2D g;
     
 	private static Point p_cen;
@@ -35,31 +36,36 @@ public class Painter
 
 	private final int height; // height of the picture
 	private final int width; // width of the picture	
-	private final boolean update; 
 	private boolean is_rotate;
+	private int currentTime;
 	private ImageObserver observer;
 	private boolean done;
 	
 	
-	public Painter(Vector<Word> result, int width, int height, boolean update, ImageObserver observer) 
+	public Painter(int width, int height, ImageObserver observer) 
 	{
 		this.width = width;
+		current = new Vector<Occurrence>();
 		this.height = height;
-		this.update = update;
 		this.observer = observer;
-	    done = false;
-		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+	    done = false;	    
+	    currentTime = 0;
 		p_cen = new Point(width / 2, height / 2);
 		min_size = new Point(0,0);
 		color_style="warm";	
-
+		
+		img = new BufferedImage[Label.MAXCOUNT];
+		for (int i = 0; i < img.length; i++)
+		{
+			img[i] = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		}
+		
 		//set shape
-		bound=new Bound("heart", width, height);
+		bound=new Bound("", width, height);
 		bound_shape=bound.get_shape();
 		
-		words = result;
-		g = img.createGraphics();
-		g.fillRect(0, 0, width, height); // Fill the picture with white
+		words = Occurrence.getOccu();
+		
 		try 
 		{
 			InputStream myStream = new BufferedInputStream(new FileInputStream(fontfile));
@@ -73,73 +79,92 @@ public class Painter
 
 	public String paint()
 	{
-		if (done) repaint();
-		g.fillRect(0, 0, width, height); // Fill the picture with white
 		long startTime = new Date().getTime();
 		if (words.size() == 0)
 		{
 			return "No Keywords Found!";
 		}
-
-		int drawn = 0;
-		setSize(); // Reset make is the size of the font
-
-		if (update) observer.imageUpdate(img, ImageObserver.ALLBITS, 0, 0, width, height);
 		
-		for (int i = 0; i < max_num && i < words.size(); i++)
+		for (int time = 0; time < img.length; time ++)
 		{
-			if (paintStr(i, i > 5 ? 2 : 0) == 0) break;
-			drawn ++;
-			System.out.println((i + 1 ) + " / " + words.size() + " done. Size: " + words.get(i).getSize());
-		}		
+			currentTime = time;
+			g = img[time].createGraphics();
+			g.fillRect(0, 0, width, height); // Fill the picture with white			
+					
+			// draw the existing ones
+			for (int j = 0; j < current.size(); j++)
+			{	
+				//check for existence
+				if (!current.get(j).exists(time))
+				{
+					current.remove(j);
+					j--;
+					continue;
+				}
+				
+				try   // Set the font
+				{
+					font = fontBase.deriveFont(Font.PLAIN, words.get(j).getSize(time));
+				} 
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				g.setFont(font);
+				g.drawString(current.get(j).getLabel().getStr(), current.get(j).X(), current.get(j).Y());
+			}	
+			
+//			if (update) observer.imageUpdate(img, ImageObserver.ALLBITS, 0, 0, width, height);
+			
+			while(true)
+			{
+				if (paintStr() == 0) break;
+				System.out.println((time + 1 ) + " / " + words.size() + " done. Size: " + words.get(time).getSize(time));
+			}		
+			
+		}
+
 		System.out.println("Paint Successful!");   
 		long endTime = new Date().getTime();
 		done = true;
-		return drawn  + " drawn. \nTime used: " + (endTime - startTime) / 1000 + "." + (endTime - startTime) % 1000 + " s.";
+		return "Time used: " + (endTime - startTime) / 1000 + "." + (endTime - startTime) % 1000 + " s.";
 	}
 	
 	private void repaint() 
 	{
-		for (int i = 0; i < words.size(); i++)
-		{
-			if (words.get(i).X() == -1) continue;		
-			try   // Set the font
-			{
-				font = fontBase.deriveFont(Font.PLAIN, words.get(i).getSize());
-			} 
-			catch (Exception ex)
-			{
-				ex.printStackTrace();
-			}
-			g.setFont(font);
-			g.drawString(words.get(i).getStr(), words.get(i).X(), words.get(i).Y());
-		}		
-		observer.imageUpdate(img, ImageObserver.ALLBITS, 0, 0, width, height);
+//		for (int i = 0; i < words.size(); i++)
+//		{
+//			if (words.get(i).X() == -1) continue;		
+//			try   // Set the font
+//			{
+//				font = fontBase.deriveFont(Font.PLAIN, words.get(i).getSize());
+//			} 
+//			catch (Exception ex)
+//			{
+//				ex.printStackTrace();
+//			}
+//			g.setFont(font);
+//			g.drawString(words.get(i).getStr(), words.get(i).X(), words.get(i).Y());
+//		}		
+//		observer.imageUpdate(img, ImageObserver.ALLBITS, 0, 0, width, height);
 	}
 
-	public BufferedImage getImg()
+	public BufferedImage[] getImg()
 	{
 		return img;
 	}
 	
-	//according to the frequency of word determine the size of font.
-	private void setSize() 
+	
+	private int paintStr()
 	{
-		int sum = 0; // The sum of all the keywords found
-		for (int i = 0; i < words.size(); i++) sum += words.get(i).getCount();
-		for (int i = 0; i < words.size(); i++) 
-		{
-			int temp = words.get(i).getCount() * 130 / sum + 125 - i / 10 * 30; // Function to determine the font size
-			if (temp < font_min) temp = font_min; // Minimum size 
-			else if (temp > font_max) temp = font_max; // Maximum size
-			words.get(i).setSize(temp);
-		}
 		
-	}
-	
-	
-	private int paintStr(int i, int sides)
-	{
+		//already expires
+		if (!words.get(0).exists(currentTime))
+		{
+			System.out.println(words.get(0).getLabel().getStr() + "expires brfoe drawing!");
+			words.remove(0);
+			return 1;
+		}
 		
 		// Try to find an empty space of the string
 		Point position = null;	
@@ -148,19 +173,23 @@ public class Painter
 		AffineTransform tx = null;
 		boolean found = false;
 		Point[] str_vertex = new Point[4];
+		
+		//TODO::change
+		int sides = 0;
+		
 		while (!found)
 		{
 			// Set the font
 			try 
 			{
-				font = fontBase.deriveFont(Font.PLAIN, words.get(i).getSize());
+				font = fontBase.deriveFont(Font.PLAIN, words.get(0).getSize(currentTime));
 			} 
 			catch (Exception ex)
 			{
 				ex.printStackTrace();
 			}
 			g.setFont(font);
-			TextShape textshape = new TextShape(font,words.get(i).getStr());
+			TextShape textshape = new TextShape(font,words.get(0).getLabel().getStr());
 			draw_word=textshape.getShape();
 			tx = new AffineTransform();
 			bounds = draw_word.getBounds();
@@ -186,7 +215,7 @@ public class Painter
 			{
 				//rotate it 4 times to fit space
 				for(int k = 0; k < 6; k++) {
-					position = searchSpace(bounds, j, i);
+					position = searchSpace(bounds, j);
 					if (position != null)
 					{
 						found = true;
@@ -204,13 +233,13 @@ public class Painter
 			
 			if (!found) // no space, try to make the word smaller
 			{
-				words.get(i).setSize(words.get(i).getSize() - 10);
-				if (words.get(i).getSize() < font_min) // too small. no space available on the canvas
-				{
-					System.out.println("Warning! No space available!");
-					return 0;		
-				}
-					
+//				words.get(i).setSize(words.get(i).getSize() - 10);
+//				if (words.get(i).getSize() < font_min) // too small. no space available on the canvas
+//				{
+//					System.out.println("Warning! No space available!");
+//					return 0;		
+//				}
+				return 0;	
 			}
 		}
 		
@@ -229,11 +258,15 @@ public class Painter
 //		g.drawLine((int)str_vertex[2].x, (int)str_vertex[2].y, (int)str_vertex[3].x, (int)str_vertex[3].y);
 //		g.drawLine((int)str_vertex[3].x, (int)str_vertex[3].y, (int)str_vertex[0].x, (int)str_vertex[0].y);
 		g.fill(draw_word);
-		words.get(i).setPoint(x, y);
+		words.get(0).setPoint(x, y);
 		int[] str_x = {(int)str_vertex[0].x, (int)str_vertex[1].x, (int)str_vertex[2].x, (int)str_vertex[3].x};
 		int[] str_y = {(int)str_vertex[0].y, (int)str_vertex[1].y, (int)str_vertex[2].y, (int)str_vertex[3].y};
-		words.get(i).setBounds(new Polygon(str_x, str_y, 4));
-		if (update) observer.imageUpdate(img, ImageObserver.ALLBITS, position.x, position.y, bounds.width, bounds.height);
+		words.get(0).setBounds(new Polygon(str_x, str_y, 4));
+//		if (update) observer.imageUpdate(img, ImageObserver.ALLBITS, position.x, position.y, bounds.width, bounds.height);
+		//copy from words to current
+		current.add(words.get(0));
+		words.remove(0);
+		
 		return 1;	
 	}
 
@@ -253,7 +286,7 @@ public class Painter
 	}
 			
 
-	private Point searchSpace(Rectangle bounds, int sides, int i)
+	private Point searchSpace(Rectangle bounds, int sides)
 	{		
 		// The bounds of the string
 		int str_X;
@@ -282,7 +315,7 @@ public class Painter
 				}
 				if(min_size.y==font_min)break;
 			}
-			if (isEmpty(x-str_X/2, y-str_Y/2, str_X, str_Y, sides, i))
+			if (isEmpty(x-str_X/2, y-str_Y/2, str_X, str_Y, sides))
 			{
 				return new Point(x-str_X/2, y-str_Y/2);
 			}
@@ -333,13 +366,13 @@ public class Painter
 		return null;
 	}	
 	
-	private boolean isEmpty(int x, int y, int str_X, int str_Y, int sides, int n)
+	private boolean isEmpty(int x, int y, int str_X, int str_Y, int sides)
 	{
 		if (x + str_X >= width || y + str_Y >= height) return false;
 	
-		for (int l = 0; l < n; l++)
+		for (int l = 0; l < current.size(); l++)
 		{
-			if (words.get(l).getBounds().contains(x, y) || words.get(l).getBounds().contains(x + str_X, y + str_Y))
+			if (current.get(l).getBounds().contains(x, y) || current.get(l).getBounds().contains(x + str_X, y + str_Y))
 			{
 				return false;
 			}
@@ -451,7 +484,7 @@ public class Painter
 
 	private boolean isInShape(int a, int b)
 	{
-		if (bound_shape.contains(a, b) && img.getRGB(a, b) == Color.white.getRGB()) 
+		if (bound_shape.contains(a, b) && img[currentTime].getRGB(a, b) == Color.white.getRGB()) 
 		{
 //			g.drawOval((int) d.getX(), (int) d.getY(), 1, 1);
 			return true;
@@ -468,7 +501,7 @@ public class Painter
 		{
 			return false;
 		}
-		if (img.getRGB(a, b) != Color.white.getRGB()) 
+		if (img[currentTime].getRGB(a, b) != Color.white.getRGB()) 
 		{
 			return true;
 		} 
