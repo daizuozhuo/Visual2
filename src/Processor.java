@@ -45,14 +45,13 @@ public class Processor {;
 		return date;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Label> getLabels(){
 		Collection<Label> mylabels=labels.values();
 		List<Label> listlabels = new ArrayList<Label>(mylabels);
-		Collections.sort(listlabels,Label.compareCount());
 		return listlabels;
 		
 	}
+
 	
 	private void processDoc(File doc,int day){
 		if(!doc.isFile()) return ;
@@ -92,6 +91,28 @@ public class Processor {;
 		} else {
 			Label label = new Label(word);
 			label.addTimeLine(cnt,day);
+			labels.put(word,label);
+		}
+	}
+	private void processContent(String content){
+		String[] strs= content.split(" "); 
+		String word= strs[0];
+		int cnt=0;
+		try{
+			cnt = Integer.parseInt(strs[1]); 
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		//search the word
+
+		if(labels.containsKey(word)){
+			Label label = labels.get(word);
+			label.addTimeLine(cnt);
+			labels.put(word,label);
+		} else {
+			Label label = new Label(word);
+			label.addTimeLine(cnt);
 			labels.put(word,label);
 		}
 	}
