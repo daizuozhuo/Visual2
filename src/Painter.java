@@ -18,7 +18,7 @@ public class Painter
 {
 	private Vector<Occurrence> words; // keywords to paint
 	private Vector<Occurrence> current; // keywords to current exists
-	private final static String fontfile = "res/font.ttf"; // Font
+	private final static String fontfile = "res/times.ttf"; // Font
 	private BufferedImage[] img;
 	Graphics2D g;
     
@@ -54,6 +54,8 @@ public class Painter
 		min_size = new Point(0,0);
 		color_style="warm";	
 		
+
+		//TODO: debug
 		img = new BufferedImage[Label.MAXCOUNT];
 		for (int i = 0; i < img.length; i++)
 		{
@@ -104,7 +106,7 @@ public class Painter
 				
 				try   // Set the font
 				{
-					font = fontBase.deriveFont(Font.PLAIN, words.get(j).getSize(time));
+					font = fontBase.deriveFont(Font.PLAIN, current.get(j).getSize(time));
 				} 
 				catch (Exception ex)
 				{
@@ -112,6 +114,8 @@ public class Painter
 				}
 				g.setFont(font);
 				g.drawString(current.get(j).getLabel().getStr(), current.get(j).X(), current.get(j).Y());
+
+				System.out.println(current.get(j).getLabel().getStr() + " !!!!! " + font.getSize() +current.get(j).X() + "   " + current.get(j).Y()) ;
 			}	
 			
 //			if (update) observer.imageUpdate(img, ImageObserver.ALLBITS, 0, 0, width, height);
@@ -119,9 +123,10 @@ public class Painter
 			while(true)
 			{
 				if (paintStr() == 0) break;
-				System.out.println((time + 1 ) + " / " + words.size() + " done. Size: " + words.get(time).getSize(time));
+				System.out.println((time + 1 ) + " / " + Label.MAXCOUNT + " done. Size: " + current.size());
 			}		
-			
+
+			g.drawString(currentTime + "", 200, 200);
 		}
 
 		System.out.println("Paint Successful!");   
@@ -157,14 +162,20 @@ public class Painter
 	
 	private int paintStr()
 	{
+		//nothing to draw
+		if (words.size() == 0 || words.get(0).getStart() > currentTime)
+		{
+			return 0;
+		}
 		
 		//already expires
 		if (!words.get(0).exists(currentTime))
 		{
-			System.out.println(words.get(0).getLabel().getStr() + "expires brfoe drawing!");
+			System.out.println(words.get(0).getLabel().getStr() + " :expires brfoe drawing!");
 			words.remove(0);
 			return 1;
 		}
+		
 		
 		// Try to find an empty space of the string
 		Point position = null;	
@@ -276,13 +287,14 @@ public class Painter
 	private void setColor(Point position)
 	{
 		if(color_style == "warm") {
-			System.out.println("warm");
+//			System.out.println("warm");
 			g.setColor(new Color(
 					 max( position.x/5>250 ? 250 : position.x/5 , 120 ),
 					 max( position.y/5>200 ? 200 : position.y/5 , 50 ),
 					 max( (position.x+position.y)/10>250 ? 250 : (position.x+position.y)/10 , 120 )
 					 ));
 		}
+		g.setColor(new Color(200, 200, 0));
 	}
 			
 

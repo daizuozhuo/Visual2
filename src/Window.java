@@ -34,8 +34,8 @@ public class Window extends JFrame {
 	private JCheckBoxMenuItem menuItem_update;
 	private Wordle wordle;
 	private Painter painter;
-	private final int height = 768; // height of the picture
-	private final int width = 1024; // width of the picture
+	private final int height = 384; // height of the picture
+	private final int width = 512; // width of the picture
 	
 	public Window(String title)
 	{

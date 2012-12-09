@@ -79,7 +79,7 @@ public class Processor {;
 		try{
 			cnt = Integer.parseInt(strs[1]); 
 		} catch(Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 		//search the word

@@ -1,9 +1,9 @@
 
 
 public class Label {
-	public static int MAXCOUNT=612;
+	public static int MAXCOUNT;
 	private static final int SMOOTH = 5;	
-	private static final int threshold = 20;
+	private static final int threshold = 0;
 	private int count;
 	private String word;
 	private int timeLine[];
@@ -13,8 +13,8 @@ public class Label {
 	public Label(String word)
 	{
 		this.word=word;
-		//TODO:: this is wrong...
 		timeLine = new int[MAXCOUNT];
+		size = new int[MAXCOUNT];
 		count=0;
 	}
 
@@ -34,6 +34,7 @@ public class Label {
 	public void addTimeLine(int j,int day){
 		if(day < MAXCOUNT){
 			timeLine[day]+=j;
+			count += j; 
 		}
 	}
 	public int getTimeLine(int i){
@@ -55,12 +56,13 @@ public class Label {
 			double s = 0;
 			for (int j = -SMOOTH; j <= SMOOTH; j++)
 			{
+				if (i + j < 0 || i + j >= timeLine.length) continue;
 				double weight = 1 / (1 + Math.abs(j));
 				s += Math.log(timeLine[i + j]) * weight;
 				weightSum += weight;
 			}
 			s /= weightSum;
-			size[i] = (int)s;
+			size[i] = (int)(s * 50);
 			
 			//calculate occurrences
 			if (size[i] > threshold)
@@ -74,13 +76,13 @@ public class Label {
 				//ends
 				if (start != -1)
 				{
-					start = -1;
-					int[] temp = new int[i = start];
-					for (int j = start; i < i; j++)
+					int[] temp = new int[i - start];
+					for (int j = start; j < i; j++)
 					{
 						temp [j - start] = size[j];
 					}
 					new Occurrence(this, start, temp);
+					start = -1;
 				}
 			}
 			
