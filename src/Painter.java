@@ -11,6 +11,7 @@ import java.awt.image.ImageObserver;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Vector;
 
@@ -18,7 +19,7 @@ public class Painter
 {
 	private Vector<Occurrence> words; // keywords to paint
 	private Vector<Occurrence> current; // keywords to current exists
-	private final static String fontfile = "res/times.ttf"; // Font
+	private final static String fontfile = "res/newtow.ttf"; // Font
 	private BufferedImage[] img;
 	Graphics2D g;
     
@@ -67,6 +68,12 @@ public class Painter
 		bound_shape=bound.get_shape();
 		
 		words = Occurrence.getOccu();
+		Collections.sort(words, new MyComparator());
+//		for (int i = 0; i < words.size(); i++)
+//		{
+//			Occurrence o = words.get(i);
+//			System.out.println(o.getLabel().getStr() + " : " + o.getStart() + ", " + o.getLabel().getValue());
+//		}
 		
 		try 
 		{
@@ -90,7 +97,11 @@ public class Painter
 		for (int time = 0; time < img.length; time ++)
 		{
 			currentTime = time;
+			//reset min_size for next frame
+			min_size.x=0;
+			min_size.y=0;
 			g = img[time].createGraphics();
+			g.setColor(Color.WHITE);
 			g.fillRect(0, 0, width, height); // Fill the picture with white			
 					
 			// draw the existing ones
@@ -113,20 +124,31 @@ public class Painter
 					ex.printStackTrace();
 				}
 				g.setFont(font);
+				g.setColor(new Color(50, 100, 70));
 				g.drawString(current.get(j).getLabel().getStr(), current.get(j).X(), current.get(j).Y());
 
-				System.out.println(current.get(j).getLabel().getStr() + " !!!!! " + font.getSize() +current.get(j).X() + "   " + current.get(j).Y()) ;
+//				System.out.println(current.get(j).getLabel().getStr() + " !!!!! " + font.getSize() +current.get(j).X() + "   " + current.get(j).Y()) ;
 			}	
 			
 //			if (update) observer.imageUpdate(img, ImageObserver.ALLBITS, 0, 0, width, height);
 			
+			System.out.println((time + 1 ) + " / " + Label.MAXCOUNT + ". Size: " + current.size());
 			while(true)
 			{
 				if (paintStr() == 0) break;
-				System.out.println((time + 1 ) + " / " + Label.MAXCOUNT + " done. Size: " + current.size());
 			}		
 
-			g.drawString(currentTime + "", 200, 200);
+			try   // Set the font
+			{
+				font = fontBase.deriveFont(Font.PLAIN, 10);
+			} 
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			g.setFont(font);
+			g.setColor(new Color(200,200,15));
+			g.drawString(currentTime + "", 20, 20);
 		}
 
 		System.out.println("Paint Successful!");   
@@ -162,16 +184,19 @@ public class Painter
 	
 	private int paintStr()
 	{
+
 		//nothing to draw
 		if (words.size() == 0 || words.get(0).getStart() > currentTime)
 		{
+			System.out.println("nothing to do at " + currentTime);
 			return 0;
 		}
 		
+
 		//already expires
 		if (!words.get(0).exists(currentTime))
 		{
-			System.out.println(words.get(0).getLabel().getStr() + " :expires brfoe drawing!");
+//			System.out.println(words.get(0).getLabel().getStr() + " :expires brfoe drawing! " + words.get(0).getStart() + " + " + words.get(0).getLength() + " > " + currentTime);
 			words.remove(0);
 			return 1;
 		}
@@ -190,10 +215,11 @@ public class Painter
 		
 		while (!found)
 		{
+
 			// Set the font
 			try 
 			{
-				font = fontBase.deriveFont(Font.PLAIN, words.get(0).getSize(currentTime));
+				font = fontBase.deriveFont(Font.PLAIN, words.get(0).getMax());
 			} 
 			catch (Exception ex)
 			{
@@ -209,23 +235,24 @@ public class Painter
 			str_vertex[2] = new Point(bounds.x + bounds.width, bounds.y + bounds.height);
 			str_vertex[3] = new Point(bounds.x + bounds.width, bounds.y);
 			
-			if(Math.random()>0.5) {
-				is_rotate=false;
-			} else {
-				is_rotate=true;
-			}
-			if(is_rotate) {	
-				AffineTransform ax = new AffineTransform();
-				ax.rotate(Math.PI/4*Math.random() ,0,0);
-				ax.transform(str_vertex, 0, str_vertex, 0, 4);
-				draw_word=ax.createTransformedShape(draw_word);
-			}
+//			if(Math.random()>0.5) {
+//				is_rotate=false;
+//			} else {
+//				is_rotate=true;
+//			}
+//			if(is_rotate) {	
+//				AffineTransform ax = new AffineTransform();
+//				ax.rotate(Math.PI/4*Math.random() ,0,0);
+//				ax.transform(str_vertex, 0, str_vertex, 0, 4);
+//				draw_word=ax.createTransformedShape(draw_word);
+//			}
 			// Get the bounds of the string
 			bounds = draw_word.getBounds();
 			for (int j = sides; j > -1; j--)
 			{
 				//rotate it 4 times to fit space
-				for(int k = 0; k < 6; k++) {
+				for(int k = 0; k < 3; k++) {
+
 					position = searchSpace(bounds, j);
 					if (position != null)
 					{
@@ -250,8 +277,10 @@ public class Painter
 //					System.out.println("Warning! No space available!");
 //					return 0;		
 //				}
+				System.out.println("No space available at " + currentTime);
 				return 0;	
 			}
+
 		}
 		
 		setColor(position);// Set the color of the string which is related to its position
@@ -278,6 +307,7 @@ public class Painter
 		current.add(words.get(0));
 		words.remove(0);
 		
+
 		return 1;	
 	}
 
@@ -299,15 +329,15 @@ public class Painter
 			
 
 	private Point searchSpace(Rectangle bounds, int sides)
-	{		
+	{	
 		// The bounds of the string
 		int str_X;
 		int str_Y;
 		str_X = bounds.width;
 		str_Y = bounds.height;
 		int loop=1;
-		int step=(int)(0.1*str_Y);
-		if(step<1)step=1;
+		int step=(int)(0.2*str_Y);
+		if(step<5)step=5;
 		int y=p_cen.y-loop;	
 		int x=p_cen.x-loop;
 		// The starting position of x and y
@@ -319,7 +349,7 @@ public class Painter
 		int low_bound=0;
 		
 		do
-		{	
+		{
 			if(min_size.x!=0){
 				if(str_X>=min_size.x&&str_Y>=min_size.y)
 				{
@@ -368,13 +398,13 @@ public class Painter
 				loop=loop+step;
 			}
 			
-		}	while (x < width - str_X / 2);	
+		}	while (y < height - str_Y / 2);	
 		
 			if (min_size.x==0) min_size.x=str_X;
 			if (min_size.x>str_X) min_size.x=str_X;
 			if(min_size.y==0) min_size.y=str_Y;
 			if(min_size.y>str_Y) min_size.y=str_Y;
-			
+//			System.out.println(str_X+" "+str_Y+" "+width+" "+height);
 		return null;
 	}	
 	

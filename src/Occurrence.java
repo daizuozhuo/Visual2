@@ -44,4 +44,5 @@ public class Occurrence
     public int Y() {return y;}
     public Polygon getBounds() {return bounds;}
     public void setPoint(int x, int y) {this.x = x; this.y = y;}
+	public int getLength() {return size.length;}
 }

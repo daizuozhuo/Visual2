@@ -11,7 +11,7 @@ public class myThread extends Thread
 	{
 		this.wordle = wordle;
 		this.img = img;
-		i = 500;
+		i = 0;
 	}
 
 	@Override
@@ -22,10 +22,10 @@ public class myThread extends Thread
    		wordle.repaint();
    		i++;
    		
-   		System.out.println(i);
+//   		System.out.println(i);
 		try 
 		{
-			Thread.sleep(1000);
+			Thread.sleep(100);
 			run();
 		} 
 		catch (InterruptedException e) 

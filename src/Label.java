@@ -2,19 +2,19 @@
 
 public class Label {
 	public static int MAXCOUNT;
-	private static final int SMOOTH = 5;	
-	private static final int threshold = 0;
+	private static final int SMOOTH = 7;	
+	private static final int threshold = 15;
 	private int count;
 	private String word;
 	private int timeLine[];
-	private int size[];
+	private double size[];
 	private double value; //how important the word is.
 	
 	public Label(String word)
 	{
 		this.word=word;
 		timeLine = new int[MAXCOUNT];
-		size = new int[MAXCOUNT];
+		size = new double[MAXCOUNT];
 		count=0;
 	}
 
@@ -47,8 +47,26 @@ public class Label {
 	
 	public void init()
 	{
+		if (count == 0)
+		{
+			return;
+		}
+		
 		int start = -1;
-		value = Math.log(count);
+		value = 0;
+		for (int i = 0; i < timeLine.length; i++)
+		{						
+			//calculate value
+			if (timeLine[i] == 0)
+				continue;
+			double p = 1.0 * timeLine[i] / count;
+			value -= p * Math.log(p); 
+		}
+		if (value < 0.01 || value > 2)
+		{
+			return;
+		}
+		
 		for (int i = 0; i < timeLine.length; i++)
 		{
 			//calculate size
@@ -57,15 +75,18 @@ public class Label {
 			for (int j = -SMOOTH; j <= SMOOTH; j++)
 			{
 				if (i + j < 0 || i + j >= timeLine.length) continue;
-				double weight = 1 / (1 + Math.abs(j));
-				s += Math.log(timeLine[i + j]) * weight;
+				double weight = 1.0 / (1 + Math.abs(j));
+				if (timeLine[i + j] > 0) 
+					s += Math.log(timeLine[i + j]) * weight;
 				weightSum += weight;
 			}
 			s /= weightSum;
-			size[i] = (int)(s * 50);
+//			if (s != 0.0) System.out.println(s);
+			size[i] = s * 400;
+			size[i] = size[i] > 60 ? 60 : size[i];
 			
 			//calculate occurrences
-			if (size[i] > threshold)
+			if (size[i] > threshold && i < timeLine.length - 1)
 			{
 				//starts or continues
 				if (start == -1)
@@ -76,21 +97,19 @@ public class Label {
 				//ends
 				if (start != -1)
 				{
-					int[] temp = new int[i - start];
-					for (int j = start; j < i; j++)
+//					System.out.println(i - start);
+					if (i - start > 20)
 					{
-						temp [j - start] = size[j];
+						int[] temp = new int[i - start];
+						for (int j = start; j < i; j++)
+						{
+							temp [j - start] = (int)size[j];
+						}
+						new Occurrence(this, start, temp);
 					}
-					new Occurrence(this, start, temp);
 					start = -1;
 				}
 			}
-			
-			//calculate value
-			if (timeLine[i] == 0)
-				continue;
-			double p = timeLine[i] / count;
-			value *= Math.pow(p, p); 
 		}
 	}
 	

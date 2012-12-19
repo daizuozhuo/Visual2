@@ -11,7 +11,14 @@ public class MyComparator implements Comparator<Occurrence>
 		if (timeDiff != 0)
 			return timeDiff;
 		
-		return (int)(o1.getLabel().getValue() - o2.getLabel().getValue());
+		double valueDiff = o1.getLabel().getValue() - o2.getLabel().getValue();
+		
+		if (Double.MIN_NORMAL > Math.abs(valueDiff))
+			return 0;
+		else if (valueDiff > 0)
+			return -1;
+		else
+			return 1;
 	}
 
 }
