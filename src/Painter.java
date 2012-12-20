@@ -41,10 +41,12 @@ public class Painter
 	private int currentTime;
 	private ImageObserver observer;
 	private boolean done;
+	private int[] date;//map time to date
 	
 	
-	public Painter(int width, int height, ImageObserver observer) 
+	public Painter(int width, int height, ImageObserver observer,int[] date) 
 	{
+		this.date=date;
 		this.width = width;
 		current = new Vector<Occurrence>();
 		this.height = height;
@@ -124,10 +126,11 @@ public class Painter
 					ex.printStackTrace();
 				}
 				g.setFont(font);
-				g.setColor(new Color(50, 100, 70));
+				System.out.println(current.get(j).X()+" "+current.get(j).Y());
+				// Set the color of the string which is related to its position
+				setColor(new Point(current.get(j).X(), current.get(j).Y()));
 				g.drawString(current.get(j).getLabel().getStr(), current.get(j).X(), current.get(j).Y());
 
-//				System.out.println(current.get(j).getLabel().getStr() + " !!!!! " + font.getSize() +current.get(j).X() + "   " + current.get(j).Y()) ;
 			}	
 			
 //			if (update) observer.imageUpdate(img, ImageObserver.ALLBITS, 0, 0, width, height);
@@ -147,8 +150,8 @@ public class Painter
 				ex.printStackTrace();
 			}
 			g.setFont(font);
-			g.setColor(new Color(200,200,15));
-			g.drawString(currentTime + "", 20, 20);
+			g.setColor(new Color(200,200,35));
+			g.drawString(date[currentTime] + "", 20, 20);
 		}
 
 		System.out.println("Paint Successful!");   
@@ -235,18 +238,6 @@ public class Painter
 			str_vertex[2] = new Point(bounds.x + bounds.width, bounds.y + bounds.height);
 			str_vertex[3] = new Point(bounds.x + bounds.width, bounds.y);
 			
-//			if(Math.random()>0.5) {
-//				is_rotate=false;
-//			} else {
-//				is_rotate=true;
-//			}
-//			if(is_rotate) {	
-//				AffineTransform ax = new AffineTransform();
-//				ax.rotate(Math.PI/4*Math.random() ,0,0);
-//				ax.transform(str_vertex, 0, str_vertex, 0, 4);
-//				draw_word=ax.createTransformedShape(draw_word);
-//			}
-			// Get the bounds of the string
 			bounds = draw_word.getBounds();
 			for (int j = sides; j > -1; j--)
 			{
@@ -271,12 +262,6 @@ public class Painter
 			
 			if (!found) // no space, try to make the word smaller
 			{
-//				words.get(i).setSize(words.get(i).getSize() - 10);
-//				if (words.get(i).getSize() < font_min) // too small. no space available on the canvas
-//				{
-//					System.out.println("Warning! No space available!");
-//					return 0;		
-//				}
 				System.out.println("No space available at " + currentTime);
 				return 0;	
 			}
@@ -291,12 +276,6 @@ public class Painter
 		tx.setToTranslation(x, y);
 		tx.transform(str_vertex, 0, str_vertex, 0, 4);
 		draw_word=tx.createTransformedShape(draw_word);
-//		Rectangle2D str_bounds = g.getFont().getStringBounds (words.get(i).getStr(), context);
-//		g.drawRect(position.x, position.y, bounds.width, bounds.height);
-//		g.drawLine((int)str_vertex[0].x, (int)str_vertex[0].y, (int)str_vertex[1].x, (int)str_vertex[1].y);
-//		g.drawLine((int)str_vertex[2].x, (int)str_vertex[2].y, (int)str_vertex[1].x, (int)str_vertex[1].y);
-//		g.drawLine((int)str_vertex[2].x, (int)str_vertex[2].y, (int)str_vertex[3].x, (int)str_vertex[3].y);
-//		g.drawLine((int)str_vertex[3].x, (int)str_vertex[3].y, (int)str_vertex[0].x, (int)str_vertex[0].y);
 		g.fill(draw_word);
 		words.get(0).setPoint(x, y);
 		int[] str_x = {(int)str_vertex[0].x, (int)str_vertex[1].x, (int)str_vertex[2].x, (int)str_vertex[3].x};
@@ -316,15 +295,12 @@ public class Painter
 	}
 	private void setColor(Point position)
 	{
-		if(color_style == "warm") {
-//			System.out.println("warm");
 			g.setColor(new Color(
-					 max( position.x/5>250 ? 250 : position.x/5 , 120 ),
-					 max( position.y/5>200 ? 200 : position.y/5 , 50 ),
-					 max( (position.x+position.y)/10>250 ? 250 : (position.x+position.y)/10 , 120 )
+					 max( position.x*255/width>250 ? 250 : position.x*255/width , 100 ),
+					 max( position.y*255/height>200 ? 200 : position.y*255/height , 50 ),
+					 max( (position.x+position.y)*255/(width+height)>250 ? 250 :
+						 (position.x+position.y)*255/(width+height) , 100 )
 					 ));
-		}
-		g.setColor(new Color(200, 200, 0));
 	}
 			
 
@@ -398,7 +374,7 @@ public class Painter
 				loop=loop+step;
 			}
 			
-		}	while (y < height - str_Y / 2);	
+		}	while (x < width - str_X / 2);	
 		
 			if (min_size.x==0) min_size.x=str_X;
 			if (min_size.x>str_X) min_size.x=str_X;

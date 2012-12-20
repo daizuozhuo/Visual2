@@ -10,8 +10,8 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 public class Processor {;
-	private int date;
 	private Hashtable<String,Label> labels;
+	private int[] date;//map each index to date fo passage
 	
 	//this is the sample usage
 //	public static void main(String[] args){
@@ -28,11 +28,12 @@ public class Processor {;
 	Processor(String company){
 		File filepath=new File("data/"+company+"/docs.stas");
 		File docs[] = filepath.listFiles();
-		date=Integer.parseInt(docs[0].getName());
+		date=new int[docs.length];
 		labels= new Hashtable<String,Label>();
 		Label.setMaxCount(docs.length);
 		for(int i=0; i<docs.length;i++){
 //		for(int i=0; i<1;i++){
+			date[i]=Integer.parseInt(docs[i].getName());
 			for(File doc:docs[i].listFiles()){
 				processDoc(doc,i);
 			}
@@ -40,7 +41,7 @@ public class Processor {;
 		}
 	}
 	
-	public int getDate(){
+	public int[] getDate(){
 		return date;
 	}
 	

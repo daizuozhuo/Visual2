@@ -34,7 +34,7 @@ public class Window extends JFrame {
 	private JCheckBoxMenuItem menuItem_update;
 	private Wordle wordle;
 	private Painter painter;
-	private final int height = 384; // height of the picture
+	private final int height = 512; // height of the picture
 	private final int width = 512; // width of the picture
 	
 	public Window(String title)
@@ -130,6 +130,7 @@ public class Window extends JFrame {
         // Analyse input init all labels
 		Processor pro=new Processor("Sony");
 		List<Label> labels=pro.getLabels();
+		int[] date=pro.getDate();
 		Iterator<Label> i = labels.iterator();
 		while(i.hasNext())
 		{
@@ -139,7 +140,7 @@ public class Window extends JFrame {
 //       	for (int i = 0 ; i < result.size(); i++) result.get(i).print();
 //       	System.out.println("------------------ " + result.size() + " keywords found ------------------");
 
-       	painter = new Painter(width, height, wordle);
+       	painter = new Painter(width, height, wordle,date);
 	
    		JOptionPane.showMessageDialog(null, painter.paint(), "Message", 1/*, new ImageIcon(Toolkit.getDefaultToolkit().getImage("res/icon.jpg"))*/);
    	

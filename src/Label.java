@@ -1,5 +1,3 @@
-
-
 public class Label {
 	public static int MAXCOUNT;
 	private static final int SMOOTH = 7;	
@@ -9,7 +7,7 @@ public class Label {
 	private int timeLine[];
 	private double size[];
 	private double value; //how important the word is.
-	
+
 	public Label(String word)
 	{
 		this.word=word;
@@ -21,16 +19,16 @@ public class Label {
 	public static void setMaxCount(int cnt){
 		MAXCOUNT=cnt;
 	}
-	
+
 	public String getWord(){
 		return word;
 	}
-	
+
 	public String getStr()
 	{
 		return word;
 	}
-	
+
 	public void addTimeLine(int j,int day){
 		if(day < MAXCOUNT){
 			timeLine[day]+=j;
@@ -40,18 +38,18 @@ public class Label {
 	public int getTimeLine(int i){
 		return timeLine[i];
 	}
-	
+
 	public int getCount(){
 		return count;
 	}
-	
+
 	public void init()
 	{
 		if (count == 0)
 		{
 			return;
 		}
-		
+
 		int start = -1;
 		value = 0;
 		for (int i = 0; i < timeLine.length; i++)
@@ -66,7 +64,7 @@ public class Label {
 		{
 			return;
 		}
-		
+
 		for (int i = 0; i < timeLine.length; i++)
 		{
 			//calculate size
@@ -84,7 +82,7 @@ public class Label {
 //			if (s != 0.0) System.out.println(s);
 			size[i] = s * 400;
 			size[i] = size[i] > 60 ? 60 : size[i];
-			
+
 			//calculate occurrences
 			if (size[i] > threshold && i < timeLine.length - 1)
 			{
@@ -112,8 +110,8 @@ public class Label {
 			}
 		}
 	}
-	
+
 	public double getValue() {return value;}
-	
-	
+
+
 }
